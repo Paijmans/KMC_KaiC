@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Run a parameter sweep with GKaiC.
+
+# Usage: KMCKaiC_paramscan <PARAM_FILE>
+
+# The KMCKaiC parameter file should contain parameter equated to '[PARAM1]',...,'[PARAMi]'. 
+# This file replaces every occurance of these with the parameter value 
+# spedified in the files PARAM1,...,PARAMi, and runs the simulation on the
+# model file.
+
+#Get project name of model file.
+#PROJECT_NAME=`echo $INPUT_FILE | sed 's/\([0-9A-Za-z_-]*\).*/\1/'`
+PROJECT_NAME=$1
+
+#Remove older files.
+rm -f *~
+rm -fr $PROJECT_NAME"_"*
+
+# Define files for parameter parsing.
+PARAM_FILE=$PROJECT_NAME".par"
+
+#Give output filename the project name
+OUTPUT_FILE=$PROJECT_NAME'.dat'
+
+#Find the number of PARAM files.
+PARAM_NBR=`ls -1 PARAM* | wc -l`
+paramfiles=`ls PARAM*`
+
+#Find number of iterations. Assuming all files have the same length as the first.
+ITERATION_NBR=`cat PARAM1 | wc -l`
+
+echo $ITERATION_NBR "simulations on roll with" $PARAM_NBR "parameters."
+
+
+for i in `seq 1 $ITERATION_NBR`
+do
+
+  echo -e "\n\nRUN:" $i "-" $ITERATION_NBR". \n"
+
+  #start counting at 100, easier dir sequence.
+  j=`expr $i + 100`
+
+  RUN_DIR=$PROJECT_NAME"_"$j
+  RUN_PAR=$PROJECT_NAME"_"$j".par"
+  RUN_LOG=$PROJECT_NAME"_"$j".log"
+
+  mkdir $RUN_DIR
+  
+  #Prepare parameter file  
+  cp $PARAM_FILE $RUN_DIR/$RUN_PAR
+  sed -i 's/\[PROJECT_NAME\]/'$OUTPUT_FILE'/' ./$RUN_DIR/$RUN_PAR   
+   
+  for paramfile in $paramfiles
+  do
+  
+    PARAM=`gawk -v lnbr="$i" 'NR==lnbr {print $1}' $paramfile`    
+    sed -i 's/\['$paramfile'\]/'$PARAM'/' ./$RUN_DIR/$RUN_PAR
+
+  done
+  
+  cd $RUN_DIR
+    
+  #Generate files for simulator from model file, and run simulation.
+  ../../../KMCKaiC $RUN_PAR
+  
+  # Retreive the peak to peak time from the oscillating phosphorylation fraction.
+  ../KMCKaiC_findpeaks.py test1.dat 0 > temp   
+  
+  echo $PARAM `cat temp` >> ../$OUTPUT_FILE  
+  
+  cd ..
+  
+done
+
+

@@ -1,0 +1,117 @@
+###Parameter file for Gillespie-KaiC program.
+
+##System variables for simulator.
+
+rnd_seed 42
+
+KaiA0 0.6
+KaiC0 0.6
+KaiB0 3.4
+
+tequ 0
+tend 2.0e4
+t_sample_incr 10
+
+#volume 1.6667
+volume 1200
+start_phosphorylated 0
+
+input_filename input.dat
+output_filename test1
+
+#Parameter related to temporal flux integration.
+start_frac_reg 0.0
+interval_reg 1.0
+
+##Parameter values of the model.
+
+#Hexamer state switching (CI-ADP dependent)
+kconf0 10.0 
+ddGTDconf 19
+nIADPconfref 5
+
+
+#KaiB binding stabalized CI-ADP state with this energy:
+kAkIDoff 0.0
+
+#Activation energy of ADP off rate in CI domain, Active state
+dgACIActU -0.0
+dgACIActT -0.8
+dgACIActD  0.4
+dgACIActS  0.8
+
+#Activation energy of ADP off rate in CI domain, Inactive state
+dgICIActU -0.2
+dgICIActT -0.8
+dgICIActD  0.4
+dgICIActS  0.8
+
+
+#CI-KaiA sequestration; Active and Inactive state of KaiC. (CII-p dependent)
+kACIAon 1e6
+kACIAoff 1e1
+
+kICIAon 1e6
+kICIAoff 1e-1
+
+kICIBon 2.0
+kICIBoff 1e-2
+
+kACIBon 1e-1
+kACIBoff 1e1
+
+# Number of KaiA dimers sequestered by an inactive KaiC hexamer.
+nAseq 6
+nBseq 6
+
+ATPfrac 1.0
+
+
+#tstartADP [72.15 + [PARAM1]]
+#tendADP [78.15 + [PARAM1]]
+ATPfrac_ADPphase 1.0;
+
+#CI-nucleotide exchange (KaiA and CII-p dependent)
+kCIhyd 1.0
+kCIADPoff0 1.5
+kCIATPoff 0.0 
+
+#High ATP off inconsistent with ATP* Kondo experiment  
+kCIIhyd0 1.0
+kCIIhydA 1.0
+kCIInucloff0 0.0
+kCIInucloffA 0.6
+KATPoKADP 0.1
+
+#CII-nucleotide exchange (KaiA, CII-p dependent)
+kCIIAon 1e3
+kCIIAoff 0.05
+#Energy penalty when CII.KAIA is in inactive state.
+dGICII 10
+
+#Binding free energy difference CII.KaiA, dependent on phosphorylation.
+dgACIIU   -0.00
+dgACIIT   -0.30
+dgACIID    1.00
+dgACIIS    2.00
+
+#For ADP mediated and spontanious dephosphorylation
+kUT 0.50
+kTU 1.78
+kTD 0.40
+kDT 0.20
+kSD 1.50
+kDS 2.00
+kUS 0.15
+kSU 0.20
+
+
+
+
+
+#Depricated vars
+kBswitch_f 10.0
+nIADPAref 6
+ddGTDAbind 0
+dGIbindB -10
+

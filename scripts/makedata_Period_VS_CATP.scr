@@ -1,0 +1,48 @@
+#!/bin/bash
+
+PROJECT_NAME=$1
+
+#Remove older files.
+rm -f *~
+
+# File with parameter values
+PARAM_FILE='PARAMS'
+
+#Give output filename the project name
+OUTPUT_FILE=$PROJECT_NAME'.dat'
+OUTPUT_FILE2=$PROJECT_NAME'.avg'
+
+rm $OUTPUT_FILE $OUTPUT_FILE2
+touch $OUTPUT_FILE
+
+#Find number of iterations. Assuming all files have the same length as the first.
+ITERATION_NBR=`cat $PARAM_FILE | wc -l`
+
+echo 'Number of parameters: ' $ITERATION_NBR
+
+for i in `seq 1 $ITERATION_NBR`
+do
+
+  echo -e "\n\nPROCESSING:" $i "-" $ITERATION_NBR". \n"
+
+  PARAM_VALUE=`gawk -v lnbr="$i" 'NR==lnbr {print $1}' $PARAM_FILE`      
+
+  #start counting at 100, easier dir sequence.
+  j=`expr $i + 100`
+
+  RUN_DIR=$PROJECT_NAME"_"$j
+
+  cd $RUN_DIR
+  
+  KMCKaiC_findperiods test1.dat > temp   
+  
+  echo $PARAM_VALUE `cat temp` >> ../$OUTPUT_FILE
+   
+  KMCKaiC_average test1.dat > temp
+  
+  echo $PARAM_VALUE `cat temp` >> ../$OUTPUT_FILE2  
+       
+  rm temp   
+  cd ..
+  
+done

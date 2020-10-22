@@ -1,0 +1,132 @@
+###################################################
+### Parameter file for Kinetic Monte Carlo-KaiC ###
+###################################################
+
+
+### SYSTEM VARIABLES. ###
+
+#Seed for random number generator
+rnd_seed 42
+
+#Filename of the output time traces. (.dat is added to the filename).
+output_filename test1
+
+#Maximum simulated time.
+tend 18
+
+# Time after which data is recorded.
+tequ 0
+
+#Time between samples for the timetraces.
+t_sample_incr 0.1
+
+#System volume in cubic microns.
+volume 2
+
+#Set whether the hexamers start out phosphorylated (1) or not (0).
+start_phosphorylated 0
+
+# Concentrations of KaiA dimers and KaiC hexamers; in micromolair.
+KaiA0 0.6
+KaiC0 0.6
+
+#Fraction of ATP in solution ([ATP]/([ADP]+[ATP])).
+ATPfrac 1.0
+
+
+### PARAMETERS RELATED TO CI DOMAIN ###
+
+#Hydrolysis rate in the CI domain.
+kCIhyd 1.0
+
+#Dissociation rate of ADP from the CI domain.
+kCIADPoff0 1.5
+
+#Prefactor to set the rate of the conformational switch.
+kconf0 10.0 
+
+#Free energy change for replacing ATP with ADP in CI domain.
+ddGTDconf 19
+
+#Number of ADP nucleotides in CI domain when the free energy difference
+#between active and inactice state is zero (when no KaiA or KaiB is bound).
+nIADPconfref 5
+
+#Change in the activation energy of the ADP dissociation rate, 
+#due to the phosphorylation state (U,T,D,S) of a monomer.
+
+#When hexamer is in the Active state.
+dgACIActU -0.0
+dgACIActT -0.8
+dgACIActD  0.4
+dgACIActS  0.8
+
+#When hexamer is in the Inactive state.
+dgICIActU -0.2
+dgICIActT -0.8
+dgICIActD  0.4
+dgICIActS  0.8
+
+#On and Off rates of KaiB with the CI domain, in Active state.
+kACIBon 1e-1
+kACIBoff 1e1
+
+#On and Off rates of KaiB with the CI domain, in Inactive state.
+kICIBon 2.0
+kICIBoff 1e-2
+
+#On and Off rates of KaiA with the CI domain, in Active state.
+kACIAon 1e6
+kACIAoff 1e1
+
+#On and Off rates of KaiA with the CI domain, in Inactive state.
+kICIAon 1e6
+kICIAoff 1e-1
+
+#Maximal number of KaiA dimers that can be sequestered by a hexamer.
+nAseq 0
+
+#Number of KaiB monomers bound to CI before KaiA can be sequestered.
+nBseq 0
+
+
+
+### PARAMETERS RELATED TO CII DOMAIN ###
+
+#Hydrolysis rates in the CII domain when KaiA is not or is bound to the CII domain.
+kCIIhyd0 1.0
+kCIIhydA 1.0
+
+#Dissociation rates of ADP from the CII domain; when KaiA is not or is bound to the CII domain.
+kCIInucloff0 0.0
+kCIInucloffA 0.6
+
+#ATP dissociation constant divided by the ADP dissociation constant.
+#Used to determine the dissociation rate of ADP from CII.
+KATPoKADP 0.1
+
+#On and Off rates of KaiA with the CII domain, when hexamer is not phosphorylated.
+kCIIAon 1e3
+kCIIAoff 1.0
+
+#Change in the binding free energy of KaiA to the CII domain, 
+#due to the phosphorylation state (U,T,D,S) of a monomer.
+dgACIIU   -0.00
+dgACIIT   -0.30
+dgACIID    1.00
+dgACIIS    2.00
+
+#Change in the binding free energy of KaiA to the CII domain, 
+#when hexamer switches to inactive state.
+dGICII 10
+
+#Phosphotransfer rates between phosphorylation states U,T,D and S.
+kUT 0.50
+kTU 1.78
+kTD 0.40
+kDT 0.20
+kSD 1.50
+kDS 2.00
+kUS 0.15
+kSU 0.20
+

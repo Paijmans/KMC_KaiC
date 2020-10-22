@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Usage: KMCKaiC_average <Filename>
+
+# Averages all columns in a given file, and outputs data to screen.
+
+FILE_NAME=$1
+
+SAMPLE_NBR=`cat $FILE_NAME | wc -l`
+SAMPLE_NBR=`expr $SAMPLE_NBR - 1`
+COLUMN_NBR=`head -n 1 $FILE_NAME | wc -w`
+
+echo "Averaging" $COLUMN_NBR "columns, from file" $FILE_NAME ", which contains" $SAMPLE_NBR "samples." >&2
+
+AVGLIST=()
+for i in `seq 2 $COLUMN_NBR`
+do
+
+  echo -e "AVERAGING COLUMN:" $i "OF" $COLUMN_NBR"." >&2
+
+  AVERAGE=`gawk -v sample_nbr="$SAMPLE_NBR" -v column="$i" '{sum1 += $column}; END {print sum1/sample_nbr}' $FILE_NAME`
+
+  AVGLIST+=($AVERAGE)
+  
+done
+
+echo ${AVGLIST[@]}
+
+#ATPase_AVERAGE=`gawk -v sample_nbr="$SAMPLE_NBR" '{sum1 += $16; sum2 += $18; sum12 = sum1 + sum2}; END {print sum1/sample_nbr, sum2/sample_nbr, sum12/sample_nbr}' $FILE_NAME`
+#ATPfrac_AVERAGE=`gawk -v sample_nbr="$SAMPLE_NBR" '{sum1 += $7; sum2 += $8; sum12 = sum1 + sum2}; END {print sum1/(6*sample_nbr), sum2/(6*sample_nbr), sum12/(2*6*sample_nbr)}' $FILE_NAME`
+#echo $ATPase_AVERAGE $ATPfrac_AVERAGE
+  
+
+

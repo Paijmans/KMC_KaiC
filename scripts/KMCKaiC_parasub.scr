@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Parameter subsitution converting a Gillespie template file
+# into a Gillespie model file.
+
+# Usage: Gillespie_parasub <parameter file> <Project template file> <Project model file>
+
+# parameter file is of the form 'PARAMETER_NAME = #PARAMETER_VALUE \n'
+# Template file should contain strings like [PARAMETER_NAME], which are then 
+# subsituted with the PARAMETER_VALUE given in PARAMETER_FILE.
+
+# Define files
+PROJECT_NAME=$1
+PARAM_FILE=$PROJECT_NAME'.par'
+TEMPL_FILE=$PROJECT_NAME'.mtp'
+MODEL_FILE=$PROJECT_NAME'.mdl'
+
+cp $TEMPL_FILE TEMP_FILE.tmp
+
+PARAM_NBR=`cat $PARAM_FILE | wc -l`
+
+for i in `seq 1 $PARAM_NBR`
+do
+ 
+  PARAM=`awk -v lnbr="$i" 'NR==lnbr {print $1}' $PARAM_FILE`
+  PARAM_VALUE=`awk -v lnbr="$i" 'NR==lnbr {print $3}' $PARAM_FILE`    
+
+  # Ignore empty lines.
+  if [[ "$PARAM" = "" ]]; then
+    continue
+  fi
+
+  # Ignore lines starting with # (comments).
+  short=${PARAM:0:1}
+  if [[ "$short" = "#" ]]; then
+    continue
+  fi
+
+  #echo "Substituting" $PARAM "with value" $PARAM_VALUE "in" $TEMPL_FILE"."
+  
+  sed -i 's/\['$PARAM'\]/'$PARAM_VALUE'/g' TEMP_FILE.tmp
+  
+done
+
+if [[ `grep "\[*\]" TEMP_FILE.tmp` != "" ]]; then
+  echo "WARNING: Not al parameters in the template file where substituted."
+fi
+
+mv TEMP_FILE.tmp $MODEL_FILE

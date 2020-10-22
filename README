@@ -1,0 +1,97 @@
+ORIGINAL MODEL OF THE POST-TRANSLATIONAL KAI OSCILLATOR
+
+- This is the original version of the model as described in our PLos Computational Biology paper
+
+https://doi.org/10.1371/journal.pcbi.1005415
+
+For a fully reversible version of this model, visit https://kmc-kaic.sourceforge.io/ and download KMC_Kaic_Rev.zip.
+
+
+Introduction
+---------
+This code is a dedicated Kinetic Monte Carlo (KMC) algorithm 
+which simulates a model of the post-translational Kai circadian clock.
+The code allows you to simulate the Kai system at the level of individual
+KaiC hexamers and monomers and explicitly tracks the turnover of every ATP 
+nucleotide. This way, all the reaction rates in the simulation strictly obay
+detailed balance.
+
+The application of the code is described in the freely available preprint "A Thermodynamically consistent model of the post-translational Kai circadian clock":
+
+https://doi.org/10.1371/journal.pcbi.1005415
+
+The code is free for scientific use.  Please contact us if you plan to use this software for commercial purposes.  Do not further distribute without prior permission of the authors.  Please forward links to related publications so we can learn about your research.
+
+
+Installation
+----------
+Extract the content of this archive in a new directory.
+The simulation code is written in C++. Therefore, running the code requires installation of a C++ compiler. On a typical linux sistribution, type
+
+  make 
+
+to compile and chmod 744 KMCKaiC to make the program executable under linux, then 
+
+  ./KMCKaiC [parameter_file] 
+
+to run. (Assumes 'default.par' when no file is specified).
+
+
+Results
+----------
+The program will output three files, named test.dat, Atest1.dat and Itest1.dat
+containing time traces of inportant quantaties in the simulations, specified below.
+In test.dat, the quantaties are averaged over all hexamers, 
+in Atest.dat, the quantaties are averaged over all active hexamers 
+and in Itest.dat, the quantaties are averaged over all inactive hexamers.
+
+The ouput files will contain 23 columns, with the following quantaties
+
+01 - Time
+02 - Phosphorylation level
+03 - Concentration of free KaiA
+04 - Fraction of Hexamers which have KaiA bound to CI domain
+05 - Fraction of Hexamers which have KaiA bound to CII domain
+06 - Total KaiA fraction (should be constant).
+07 - Mean number of ATP nucleotides bound to the CI domain, per hexamer.
+08 - Mean number of ATP nucleotides bound to the CII domain, per hexamer.
+09 - Mean number of phosphorylated threonine sites, per hexamer.
+10 - Mean number of phosphorylated serine sites, per hexamer.
+11 - Mean number of monomers in the unphosphorylated (U) state, per hexamer.
+12 - Mean number of monomers in the threonine phosphorylated (T) state, per hexamer.
+13 - Mean number of monomers in the doubly (D) state, per hexamer.
+14 - Mean number of monomers in the serine phosphorylated (S) state, per hexamer.
+15 - Total ATP nuceotides consumed on CI domain, per monomer.
+16 - ATP consumption rate on CI domain, per monomer per 24 hours.
+17 - Total ATP nuceotides consumed on CII domain, per monomer.
+18 - ATP consumption rate on CII domain, per monomer per 24 hours.
+19 - Mean rate for switching from active to inactive state.
+20 - Mean on-rate of KaiA binding to CII domain.
+21 - Mean ATP dissociation rate from the CI domain.
+22 - Fraction of hexamers in the active state.
+23 - Fraction of hexamers who have the maximal number of KaiB monomers bound on CI, 
+     without having KaiA sequestered on CI.
+
+
+Reproduce manuscript figures
+----------
+In the spirit of transparency and reproducibility, we include all code used to produce the results in the preprint referenced above, including code used to plot the figures.  To reproduce the results, one should run the scripts listed in the Figures subdirectory. How to run the 
+scripts for each figure is explained in the README inside the Figures directory.
+
+
+License 
+----------
+Copyright (c) 2017 Joris Paijmans <joris.paijmans@planet.nl>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

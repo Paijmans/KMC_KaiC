@@ -1,0 +1,191 @@
+##########################################################################
+# This document describes how the figures in the paper can be recreated. #
+##########################################################################
+
+Each directory contains code to recreate the data presented in our manuscript.
+
+The program will generate a file, test1.dat, which contains 
+time traces of important quantaties in the model.
+
+The colums contain the following quantaties:
+
+01 - time
+02 - phosphorylation level
+03 - Concentration of free KaiA
+04 - Fraction of total KaiA sequestered by CI domain
+05 - Fraction of total KaiA sequestered by CII domain
+06 - Total KaiA fraction (should be constant).
+07 - Mean number of ATP nucleotides bound to the CI domain, per hexamer.
+08 - Mean number of ATP nucleotides bound to the CII domain, per hexamer.
+09 - Mean number of phosphorylated threonine sites, per hexamer.
+10 - Mean number of phosphorylated serine sites, per hexamer.
+11 - Mean number of monomers in the unphosphorylated (U) state, per hexamer.
+12 - Mean number of monomers in the threonine phosphorylated (T) state, per hexamer.
+13 - Mean number of monomers in the doubly (D) state, per hexamer.
+14 - Mean number of monomers in the serine phosphorylated (S) state, per hexamer.
+15 - Total ATP nuceotides consumed on CI domain, per monomer.
+16 - ATP consumption rate on CI domain, per monomer per 24 hours.
+17 - Total ATP nuceotides consumed on CII domain, per monomer.
+18 - ATP consumption rate on CII domain, per monomer per 24 hours.
+19 - Mean rate for switching from active to inactive state.
+20 - Mean on-rate fo KaiA binding to CII domain.
+21 - Mean ADP dissociation rate from the CI domain.
+22 - Fraction of hexamers in the active state.
+23 - Fraction of hexamers who have the maximal number of KaiB monomers bound on CI, 
+     without having KaiA sequestered on CI.
+
+
+--------------------------------------------------------------------------
+### Figure 6 - Phosphorylation dynamics
+
+# Compile: Use the main code from te root directory.
+
+# Run:
+
+  ../../KMCKaiC PanelA.par
+  ../../KMCKaiC PanelB.par
+  ./KMCKaiC_paramscan.scr PanelC
+  ./KMCKaiC_paramscan.scr PanelD  
+  ./KMCKaiC_paramscan.scr PanelE
+
+# Result:
+
+  1) For panels A and B, the KMCKaiC generates a file called test1.dat,
+  containing standard output with timetraces (see main.cpp for definition of eah column).
+  2) For panels C and D, the scripts generate a series of directories,each 
+  containing standard output file test1.dat at different ATP levels.
+  3) For Panel E, the script will generate phosphorylation time traces, 
+  just like for panel D, but now wil generate a file fitPVSATP_PanelE.dat,
+  containing the fit parameters from a model (see manuscript) fitted
+  to the first 4 hours of the simulated phosphorylation level.
+
+--------------------------------------------------------------------------
+### Figure 7 - Radioactive phosphate tracking
+
+# Complile:
+
+  make
+  
+# Run:
+
+  ./KMCKaiC PanelAB.par > RadioactiveOutput.dat
+  
+# Result:
+
+Time traces for radioactive phosphate tracking in RadioactiveOutput.dat,
+which has five columns:
+
+1 - Simulation time
+2 - Fraction of total number of radioactive phosphates attached to either serine or threonine sites.
+3 - Fraction of total number of radioactive phosphates attached to a nucleotide forming radioactive ATP*.
+4 - Fraction of total number of radioactive phosphates free in solution forming Pi*.
+5 - Total number of radioactive phospate groups, should be constant. 
+
+
+--------------------------------------------------------------------------
+### Figure 8 - Phosphorylation state-space fluxes
+
+# Compile:
+  
+  make
+
+# Run:
+
+  ./KMCKaiC PanelA.par > Statespace_flux.dat
+  ./Histogram_2Dflux.py Statespace_flux.dat > Statespace_flux.hist
+  gnuplot < Flux_Heatmap.gp
+  
+# Result:
+
+  Statespace_flux.eps, Figure showing the propability P(n_T,n_S) that a hexamer has
+  n_T threonine and n_S serine sites phosphorylated. The white arrows are an indication
+  for the magnitude of the flux between the states.
+
+
+--------------------------------------------------------------------------
+### Figure 9 - Nucleotide dynamics
+
+# Run:
+
+  ../../KMCKaiC PanelA.par
+  ../../KMCKaiC PanelB.par
+  ../../KMCKaiC PanelC.par  
+  ../../KMCKaiC PanelD_E_F.par
+
+# Result:
+
+  Standard output with timetraces in test1.dat (see main.cpp for definition of eah column).
+
+
+--------------------------------------------------------------------------
+### Figure 10 - ATP dependency
+
+# Run:
+
+  ./KMCKaiC_paramscan PanelABCDEF
+  
+# Result:
+
+  1) A series of directories, each containing time traces in test1.dat 
+  of the oscillations at different ATP fractions.
+
+  2) PanelABCDEF.dat, with columns showing:
+  
+  ATP fraction,
+  Mean Period, 
+  Standard deviation in Periods, 
+  Mean Amplitudes of oscillation 
+  Standard deviation in Amplitudes, 
+  Mean phosphorylation level of the osclliation's minima.
+  Mean phosphorylation level of the osclliation's maxima.
+  Mean Phosphorylation level, 
+  Mean phosphorylation time, 
+  Mean dephosphorylation time
+
+
+--------------------------------------------------------------------------
+### Figure 11 - Alternative model
+
+# Compile:
+
+  make
+  
+# Run:
+
+  ./KMCKaiC
+
+# Result:
+
+  Standard output with timetraces in test1.dat (see main.cpp for definition of eah column).
+  
+
+--------------------------------------------------------------------------
+### Figure 12 - KaiA sequestration distributions
+
+# Compile:
+
+  make
+  
+# Run:
+
+  ./KMCKaiC > CI_CII_bound_times.dat
+
+# Result:
+
+  CI_CII_bound_times.dat contains two columns of data, showing, for each hexamer,
+  how long at least one KaiA was bound to the CI domain and how long a KaiA was bound
+  to the CII domain, per macroscopic phosphorylation oscillation.
+  
+  To create a histogram of the bound times, run
+  
+  ./Histogram.py CI_CII_bound_times.dat 0.2 -1
+  
+  where the second argument is the width of the bins in hour, and the second argument
+  is the column in the data file for which you want to show a histogram on screen. 
+  -1 for not shoing anything. 
+  
+  The program will output two files, CI_CII_bound_times.hist0 and CI_CII_bound_times.hist1,
+  containing the histogram of the first and second data columns, respectively.
+  In the output files, first column is the middle of the bin, and the second column the 
+  proability density.
+  
