@@ -62,15 +62,14 @@ int Monomer::choose_reaction(double rnd)
 void Monomer::update_mon_prop_cont()
 {
   double sum(0.0);
-  int i(4);
+  int i(0);
     
   while(i < MONOMER_N_REACTS)
   {
     sum += this->prop_list[i++];
   }
 
-  mon_prop_cont->update_qint_qext_el(sum, 
-    prop_list[0] + prop_list[1] + prop_list[2] + prop_list[3], index);
+  mon_prop_cont->update_qint_qext_el(sum, 0.0, index);
 }
 
 
@@ -79,29 +78,37 @@ void Monomer::fire_reaction(int reaction_channel)
 {
   switch (reaction_channel)
   {
-    case 0:  nI = 0; sys->CIATPcons++; //CI-ATP -> CI-ADP + Pi
+    case 0:  nI = 0; //CI-ATP + ADP -> CI-ADP + ATP
     break;
     case 1:  nI = 1; //CI-ADP + ATP -> CI-ATP + ADP
     break;
-    case 2:  nII = 0; sys->CIIATPcons++; //CII-ATP -> CII-ADP + Pi
+    case 2:  nI = 0; sys->CIATPcons++; //CI-ATP -> CI-ADP + Pi
     break;
-    case 3:  nII = 1; //CII-ADP + ATP -> CII-ATP + ADP
+    case 3:  nI = 1; sys->CIATPcons--; //CI-ADP + Pi -> CI-ATP
+    break;    
+    case 4:  nII = 0; //CII-ATP + ADP -> CII-ADP + ATP
     break;
-    case 4:  nII = 0; T = 1; S = 0; sys->CIIATPcons++; // U <-> T
+    case 5:  nII = 1; //CII-ADP + ATP -> CII-ATP + ADP
     break;
-    case 5:  nII = 1; T = 0; S = 0; sys->CIIATPcons--; 
+    case 6:  nII = 0; sys->CIIATPcons++; //CII-ATP -> CII-ADP + Pi
     break;
-    case 6:  nII = 0; T = 1; S = 1; sys->CIIATPcons++; // T <-> D
+    case 7:  nII = 1; sys->CIIATPcons--; //CII-ADP + Pi -> CII-ATP
+    break;    
+    case 8:  nII = 0; T = 1; S = 0; sys->CIIATPcons++; // U <-> T
     break;
-    case 7:  nII = 1; T = 1; S = 0; sys->CIIATPcons--;    
+    case 9:  nII = 1; T = 0; S = 0; sys->CIIATPcons--; 
     break;
-    case 8:  nII = 0; T = 1; S = 1; sys->CIIATPcons++; // S <-> D
+    case 10:  nII = 0; T = 1; S = 1; sys->CIIATPcons++; // T <-> D
     break;
-    case 9:  nII = 1; T = 0; S = 1; sys->CIIATPcons--;
+    case 11:  nII = 1; T = 1; S = 0; sys->CIIATPcons--;    
     break;
-    case 10: nII = 0; T = 0; S = 1; sys->CIIATPcons++; // U <-> S
+    case 12:  nII = 0; T = 1; S = 1; sys->CIIATPcons++; // S <-> D
     break;
-    case 11: nII = 1; T = 0; S = 0; sys->CIIATPcons--;             
+    case 13:  nII = 1; T = 0; S = 1; sys->CIIATPcons--;
+    break;
+    case 14: nII = 0; T = 0; S = 1; sys->CIIATPcons++; // U <-> S
+    break;
+    case 15: nII = 1; T = 0; S = 0; sys->CIIATPcons--;             
     break;  
   }
 }
@@ -109,11 +116,11 @@ void Monomer::fire_reaction(int reaction_channel)
 /* CII nucleotide exchange rate, depends on KaiA bound state */
 double Monomer::kCIInucloff()
 {
-  double kCIInucloff0( reaction_consts->kCIInucloff0 );
-  double kCIInucloffA( reaction_consts->kCIInucloffA );
+  double kCIIATPoff0( reaction_consts->kCIIATPoff0 );
+  double kCIIATPoffA( reaction_consts->kCIIATPoffA );
   double CIIAbound( hexamer->get_CIIKaiA_bound() );
   
-  return (double) kCIInucloff0 * (1. - CIIAbound) + kCIInucloffA * CIIAbound;
+  return (double) kCIIATPoff0 * (1. - CIIAbound) + kCIIATPoffA * CIIAbound;
 }
 
 /* Calculate all reaction propensities possible in this monomer.
@@ -127,12 +134,15 @@ void Monomer::set_propensities()
   
   //Nucleotide related
   double kCIhyd  ( reaction_consts->kCIhyd );
-  double kCIoffADP ( hexamer->kCIADPoff() );
-  
+  double kCIATPoff ( hexamer->kCIATPoff() );
+  double KCIATPADP ( reaction_consts->KCIATPADP );
+  double kCIhydinv = 1./(KCIATPADP * sys->Khyd) * kCIhyd * sys->Piconc;
+      
   double kCIIhyd ( reaction_consts->kCIIhyd0 );
-  double kCIIoffnucl ( this->kCIInucloff() ); 
-  double KATPKADP ( reaction_consts->KATPoKADP );
-          
+  double kCIIATPoff ( this->kCIInucloff() ); 
+  double KCIIATPADP ( reaction_consts->KCIIATPADP );
+  double kCIIhydinv = 1./(KCIIATPADP * sys->Khyd) * kCIIhyd * sys->Piconc;
+            
   //Bare phosphotransfer rates 
   double kUT( reaction_consts->kUT );
   double kTU( reaction_consts->kTU );
@@ -160,31 +170,35 @@ void Monomer::set_propensities()
     kDS *= exp( .5 * dgSDbind);
     kUS *= exp(-.5 * dgUSbind);
     kSU *= exp( .5 * dgUSbind);
-    
-    kCIIhyd = reaction_consts->kCIIhydA;
   } 
     
   /* Calculate reactionchannel propensities */  
-  // CI domain:  ATP <-> ADP (Reactions depend on hexamer state)
-  prop_list[0]  = (double) nI * kCIhyd;
-  prop_list[1]  = (double) (1-nI) * kCIoffADP;
+  // CI domain: ATP <-> ADP (Nucleotide exchange)
+  prop_list[0]  = (double) nI * (1. - ATPfrac) * kCIATPoff;
+  prop_list[1]  = (double) (1-nI) * ATPfrac * kCIATPoff / KCIATPADP;
+  // CI domain: ATP <-> ADP (ATP hydrolysis)
+  prop_list[2]  = (double) nI * kCIhyd;
+  prop_list[3]  = (double) (1-nI) * kCIhydinv;
 
-  // CII domain: ATP <-> ADP (Reactions depend on hexamer state)
-  prop_list[2]  = (double) nII * (kCIIhyd + (1. - ATPfrac) * kCIIoffnucl);
-  prop_list[3]  = (double) (1-nII) * ATPfrac * kCIIoffnucl / KATPKADP;
-  
+  // CII domain: ATP <-> ADP (Nucleotide exchange)
+  prop_list[4]  = (double) nII * (1. - ATPfrac) * kCIIATPoff;
+  prop_list[5]  = (double) (1-nII) * ATPfrac * kCIIATPoff / KCIIATPADP;
+  // CII domain: ATP <-> ADP (ATP hydrolysis)
+  prop_list[6]  = (double) nII * kCIIhyd;
+  prop_list[7]  = (double) (1-nII) * kCIIhydinv;
+ 
   // CII: U <-> T
-  prop_list[4]  = (double) (1-T) * (1-S) * nII * kUT;
-  prop_list[5]  = (double) T * (1-S) * (1-nII) * kTU;
+  prop_list[8]  = (double) (1-T) * (1-S) * nII * kUT;
+  prop_list[9]  = (double) T * (1-S) * (1-nII) * kTU;
   // CII: T <-> D
-  prop_list[6]  = (double) T * (1-S) * nII * kTD;
-  prop_list[7]  = (double) T * S * (1-nII) * kDT;
+  prop_list[10]  = (double) T * (1-S) * nII * kTD;
+  prop_list[11]  = (double) T * S * (1-nII) * kDT;
   // CII: S <-> D
-  prop_list[8]  = (double) (1-T) * S * nII * kSD;
-  prop_list[9]  = (double) T * S * (1-nII) * kDS;
+  prop_list[12]  = (double) (1-T) * S * nII * kSD;
+  prop_list[13]  = (double) T * S * (1-nII) * kDS;
   // CII: U <-> S    
-  prop_list[10] = (double) (1-T) * (1-S) * nII * kUS;
-  prop_list[11] = (double) (1-T) * S * (1-nII) * kSU;
+  prop_list[14] = (double) (1-T) * (1-S) * nII * kUS;
+  prop_list[15] = (double) (1-T) * S * (1-nII) * kSU;
      
   /* Calculate total, external and internal reaction propensities */
   update_mon_prop_cont();

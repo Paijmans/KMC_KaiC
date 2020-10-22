@@ -28,6 +28,8 @@ bool propagate(SystemVariables *sys, Hexamer *hexamers, PropensityContainer *pro
   //Choose hexamer to propagate with rnd2.
   int fired_hex_idx( prop_cont->choose_index(rnd2) ); 
 
+  //cout << sys->tsim << endl; 
+
   /* When KaiA associates with or disociates from the CI or CII domains of a hexamer,
      the KaiA concentration in solution changes and propensities of all hexamers change. */
   if( hexamers[fired_hex_idx].propagate() )

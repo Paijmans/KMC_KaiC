@@ -1,10 +1,47 @@
-ORIGINAL MODEL OF THE POST-TRANSLATIONAL KAI OSCILLATOR
+MODEL CHANGE: FULLY REVERSIBLE VERSION OF THE MODEL
 
-- This is the original version of the model as described in our PLos Computational Biology paper
+There are now version of the model:
 
-https://doi.org/10.1371/journal.pcbi.1005415
+1. The original published model as described in our article in PLoS Computational Biology,
+which still had two irreversible ATP hydrolysis reactions. This version can be downloaded under KMC_KaiC_Original.zip.
 
-For a fully reversible version of this model, visit https://kmc-kaic.sourceforge.io/ and download KMC_Kaic_Rev.zip.
+2. A fully reversible model, now including the inverse reactions for ATP hydrolysis, as described below. This makes it possible to run the model at thermodynamic equilibrium. A possible set of parameters to run the system at equilibrium are given in the parameter file 'equilibrium.par'. This version of the model can be downloaded under KMC_KaiC_Rev.zip.
+ 
+
+### CHANGES COMPARED TO THE ORIGINAL MODEL
+
+
+- NEW REACTIONS:
+
+We have added three reactions to the original model to make it fully reversible:
+
+1) CI.ATP + ADP --> CI.ADP + ATP (Parameters involved: kCI_ATP-off, KCI_ATP/ADP)
+
+The CI domain can now, just like the CII domain before, bind both ATP and ADP to the nucleotide binding pocket. However, the affinity for ATP is much larger than for ADP. This introduces a new parameter here: KCIATPADP, which is the relative affinity in the binding pockets of the CI domain for ATP versus ADP. KCIATPADP = k_off^ATP/k_off^ADP.
+
+2) CI.ADP + Pi --> CI.ATP (Parameters involved: Piconc, KCI_ATP/ADP, Khyd, kCIhyd)
+
+The hydrolysis pathways in the CI domain is now reversible. The binding of an inorganic phosphate in solution, Pi, to ADP bound in the CI binding pocket, is now possible. The inverse hydrolysis rate for the CI domain is calculated as:
+
+kCIhydinv = Piconc * kCIhyd / (Khyd * KCIATPADP)
+
+3) CII.ADP + Pi --> CII.ATP (Parameters involved: Piconc, KCII_ATP/ADP, Khyd, kCIIhyd)
+
+Also the hydrolysis pathways in the CII domain is now reversible. Similar to the CI domanin, it is calculated as:
+
+kCIIhydinv = Piconc * kCIIhyd / (Khyd * KCIIATPADP)
+
+
+- NEW PARAMETERS: 
+
+The new reactions introduce three new parameters to the model, which can be set in the parameter file:
+
+1) Khyd: The Dissociation constant for ATP hydrolysis, named Khyd (ATP --> ADP + Pi), which I put to 1e5 micro molar in the simulation (There might be a better value. Mine is based on this publication: http://www.jbc.org/content/248/20/6966).
+
+2) Piconc: The concentration of inorganic phosphate in solution, named Piconc ([Pi]). I could not find any value for the [Pi] in in-vitro experiments. I put it to 1e-3 micro molar, which has almost no effect on the simulation.
+
+3) KCIATPADP: The relative nucleotide affinity of the CI domain defined as the ATP dissociation constant over the ADP dissociation constant, KCIATPADP = KCIATP/KCIADP.
+
 
 
 Introduction
@@ -34,7 +71,7 @@ to compile and chmod 744 KMCKaiC to make the program executable under linux, the
 
   ./KMCKaiC [parameter_file] 
 
-to run. (Assumes 'default.par' when no file is specified).
+to run. (Assumes 'default.par' when no file is specified. Use equilibrium.par to run the system at thermodynamic equilibrium).
 
 
 Results

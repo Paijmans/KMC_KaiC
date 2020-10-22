@@ -304,8 +304,9 @@ double Hexamer::dGACIIbind()
 }
 
 
-/* Activation energy between ADP bound state ADP unbound state,
-   in Active state dependent, on CII phos state of whole hexamer. */
+/* Activation energy between ADP bound state and ADP unbound state,
+   when the hexamer is in the inactive conformation. 
+   Activation energy is set by the CII phos state of whole hexamer. */
 double Hexamer::dGACIActADPoff()
 {
   double dgnU((double) get_hex_pU() * reaction_consts->dgACIActU);
@@ -317,8 +318,9 @@ double Hexamer::dGACIActADPoff()
 }
 
 
-/* Activation energy between ADP bound state ADP unbound state,
-   in Inactive state, dependent on CII phos state of whole hexamer. */
+/* Activation energy between ADP bound state and ADP unbound state,
+   when the hexamer is in the inactive conformation. 
+   Activation energy is set by the CII phos state of whole hexamer. */
 double Hexamer::dGICIActADPoff()
 {
   double dgnU((double) get_hex_pU() * reaction_consts->dgICIActU);
@@ -371,10 +373,9 @@ double Hexamer::kCIIAoff()
 
 
 /* ADP off rate in CI domain */
-double Hexamer::kCIADPoff()
+double Hexamer::kCIATPoff()
 {
-  double kCIADPoff(reaction_consts->kCIADPoff0), 
-         beta_actenergy(0);
+  double beta_actenergy(0);
 
   //Energy of transition state.
   if(get_CIKaiB_bound() == reaction_consts->nBseq && reaction_consts->nBseq > 0)
@@ -382,10 +383,7 @@ double Hexamer::kCIADPoff()
   else
     beta_actenergy += this->dGACIActADPoff();    
 
-  // KaiB lowers ADP off rate by stabilization of CI-ADP state.
-  beta_actenergy += get_CIKaiB_bound() * reaction_consts->kAkIDoff;
-  
-  return kCIADPoff * exp( -beta_actenergy );
+  return reaction_consts->kCIATPoff * exp( -beta_actenergy );
 }
 
 

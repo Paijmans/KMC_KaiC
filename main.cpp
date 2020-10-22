@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
   
   /* ### For normal output ### */
   write_outputfile(&sys);  
-  
+   
   cerr << "System Ready" << endl;
 }
   
@@ -178,7 +178,7 @@ HexamerAvr calc_hex_averages( Hexamer *hexamers, SystemVariables *sys, ReactionC
       ApS += hexamers[i].get_hex_pS();
       AdGconfADP += hexamers[i].kconf_f();
       AdGACIIbind += hexamers[i].kCIIAon();
-      AADPoff += hexamers[i].kCIADPoff();      
+      AADPoff += hexamers[i].kCIATPoff();      
             
       active++;
     }
@@ -199,7 +199,7 @@ HexamerAvr calc_hex_averages( Hexamer *hexamers, SystemVariables *sys, ReactionC
       IpD += hexamers[i].get_hex_pD();
       IpS += hexamers[i].get_hex_pS();
       IdGconfADP += hexamers[i].kconf_b();            
-      IADPoff += hexamers[i].kCIADPoff();
+      IADPoff += hexamers[i].kCIATPoff();
       IdGACIIbind += hexamers[i].kCIIAon();
     }
     Atot += hexamers[i].get_CIKaiA_bound() + hexamers[i].get_CIIKaiA_bound();      
@@ -215,6 +215,7 @@ HexamerAvr calc_hex_averages( Hexamer *hexamers, SystemVariables *sys, ReactionC
   if(KaiC0 == 0)
     KaiC0 = 1;
 
+  /* Calculate systems ATP consumption, split over CI and CII domain*/
   Ahex_avr_data.CIATPcons  = (double) sys->CIATPcons/(6*N_hexamers);
   Ahex_avr_data.dCIATPcons = 
     (double) 24. * (sys->CIATPcons - prev_CIATPcons)/(6*N_hexamers*sys->t_sample_incr);
@@ -267,8 +268,6 @@ HexamerAvr calc_hex_averages( Hexamer *hexamers, SystemVariables *sys, ReactionC
   Ihex_avr_data.dGACIIbind = (double) IdGACIIbind/N_hexamers;
 
 
-   
-
   //Put data in array for writing to file.
   sys->Aoutput_data[sys->sample_cntr] = Ahex_avr_data;
   sys->Ioutput_data[sys->sample_cntr] = Ihex_avr_data;  
@@ -289,146 +288,10 @@ HexamerAvr calc_hex_averages( Hexamer *hexamers, SystemVariables *sys, ReactionC
   hex_avr.pT = Ahex_avr_data.pT + Ihex_avr_data.pT;
   hex_avr.pD = Ahex_avr_data.pD + Ihex_avr_data.pD;
   hex_avr.pS = Ahex_avr_data.pS + Ihex_avr_data.pS;
-  
-  /* Show #Conformational changes */
-  //cout << sys->tsim << " " << sys->FlipCntrFw << " " << sys->FlipCntrBw << endl;
-  /* Calculate standard deviations in CI-ATP
-  cout << sys->tsim << " " 
-       << sqrt((double)(ACIATPstd - ACIATP*ACIATP/active)/active) << " "
-       << sqrt((double)(ICIATPstd - ICIATP*ICIATP/inactive)/inactive) << "  " 
-       << sqrt(((ACIATPstd + ICIATPstd) - (ACIATP+ICIATP)*(ACIATP+ICIATP)/N_hexamers)/N_hexamers) 
-       << endl; 
-   */
-  
-    
-  /* Count CI-ATP states in ensamble, destinguishing Active and Inactive states 
-  int ACIATPlist[7], ICIATPlist[7];
-  for(int j(0); j<7; j++)
-  {
-    ACIATPlist[j] = 0;
-    ICIATPlist[j] = 0;
-  }
-  
-  for(int i(0); i<sys->N_hexamers; i++)
-  {
-    if( hexamers[i].get_active() )
-    {
-      ACIATPlist[hexamers[i].get_hex_CIATP()] += 1;
-    }
-    else
-    {  
-      ICIATPlist[hexamers[i].get_hex_CIATP()] += 1;
-    }
-  }
-
-  cout << sys->tsim << " "; 
-  for(int j(0); j<7; j++)
-  {
-    cout << (double) (ACIATPlist[j]+ICIATPlist[j])/sys->N_hexamers << " ";
-  }  
-  for(int j(0); j<7; j++)
-  {
-    cout << (double) ACIATPlist[j]/sys->N_hexamers << " ";
-  }
-  for(int j(0); j<7; j++)
-  {
-    cout << (double) ICIATPlist[j]/sys->N_hexamers << " ";
-  }
-  
-  cout << endl;   
-  */
-
-  /*
-  if(sys->tsim > 47.3 && sys->tsim < 49.6)
-  {
-    cerr << "acces main power grid" << endl;
-    for(int i(0); i<sys->N_hexamers; i++)
-    {
-      cout << hexamers[i].get_hex_pS() << endl;
-    }
-  }
-  */
-  
+   
   if(inactive == 0) inactive = 1;
   if(active == 0) active = 1;
-  
-  //FILE *Hfp = fopen( "Hexamers.dat", "a" );
-  /*Print each hexamer state as integer. 
-  0 Active - No CII*A
-  1 Active - CII*A
-  2 Inactive - CII*A - CI*B < nBseq
-  3 Inactive - No CII*A - CI*B < nBseq
-  4 Inactive - CI*B = nBseq
-  5 Inactive - CI*B*A 
-  */
-
-  /*
-  //Print hexamer sequestration state.
-  for(int i(0); i<sys->N_hexamers; i++)
-  {
-    fprintf( Hfp, "%e\t", sys->tsim );
-    if( hexamers[i].get_active() && !hexamers[i].get_CIIKaiA_bound() )
-      fprintf( Hfp, "%d\t%d\t", hexamers[i].get_index(), 0);
-    if( hexamers[i].get_active() && hexamers[i].get_CIIKaiA_bound() )
-      fprintf( Hfp, "%d\t%d\t", hexamers[i].get_index(), 1);
-    if( !hexamers[i].get_active() && hexamers[i].get_CIKaiB_bound() >= 0 && hexamers[i].get_CIKaiB_bound() < reaction_consts->nBseq && hexamers[i].get_CIIKaiA_bound() )
-      fprintf( Hfp, "%d\t%d\t", hexamers[i].get_index(), 2);    
-    if( !hexamers[i].get_active() && hexamers[i].get_CIKaiB_bound() >= 0 && hexamers[i].get_CIKaiB_bound() < reaction_consts->nBseq && !hexamers[i].get_CIIKaiA_bound() )
-      fprintf( Hfp, "%d\t%d\t", hexamers[i].get_index(), 3);
-    if( !hexamers[i].get_active() && hexamers[i].get_CIKaiB_bound() == reaction_consts->nBseq && hexamers[i].get_CIKaiA_bound() == 0)
-      fprintf( Hfp, "%d\t%d\t", hexamers[i].get_index(), 4);
-    if( !hexamers[i].get_active() && hexamers[i].get_CIKaiB_bound() == reaction_consts->nBseq && hexamers[i].get_CIKaiA_bound() > 0)
-      fprintf( Hfp, "%d\t%d\t", hexamers[i].get_index(), 5);
-    fprintf( Hfp, "\n");
-  }
-  */
-  
-  /*
-  //Print hexamer CI-ATP number.
-  for(int i(0); i<sys->N_hexamers; i++)
-  {
-    fprintf(Hfp, "%e\t%d\t%d\n", sys->tsim, hexamers[i].get_index(), hexamers[i].get_hex_CIATP());
-  }
-  */
-  
-  /*
-  // Get Hexamer S-T phosphorylation state.
-  for(int i(0); i<sys->N_hexamers; i++)
-  {
-    fprintf(Hfp, "%e\t%d\t%d\n", sys->tsim, hexamers[i].get_index(), hexamers[i].get_hex_S()-hexamers[i].get_hex_T());
-  }
-  */
-
-  // Get Hexamer B sequestration.
-  /*
-  for(int i(0); i<sys->N_hexamers; i++)
-  {
-    if( hexamers[i].get_CIKaiB_bound() == 6 && hexamers[i].get_CIKaiA_bound() > 0 )
-      fprintf(Hfp, "%e\t%d\t%d\n", sys->tsim, hexamers[i].get_index(), 10);
-    else
-      fprintf(Hfp, "%e\t%d\t%d\n", sys->tsim, hexamers[i].get_index(), hexamers[i].get_CIKaiB_bound());
-  }  
-  */
-  
-  /*
-  //Print out all hexamer state variables.
-  for(int i(0); i<sys->N_hexamers; i++)
-  {
-    fprintf( Hfp, "%e\t", sys->tsim ); //1
-    fprintf( Hfp, "%d\t", hexamers[i].get_active()); //2
-    fprintf( Hfp, "%d\t", hexamers[i].get_CIIKaiA_bound() ); //3
-    fprintf( Hfp, "%d\t", hexamers[i].get_CIKaiA_bound() ); //4
-    fprintf( Hfp, "%d\t", hexamers[i].get_CIKaiB_bound() ); //5
-    fprintf( Hfp, "%d\t", hexamers[i].get_hex_CIATP() ); //6
-    fprintf( Hfp, "%d\t", hexamers[i].get_hex_CIIATP() ); //7
-    fprintf( Hfp, "%d\t", hexamers[i].get_hex_pU() ); //8
-    fprintf( Hfp, "%d\t", hexamers[i].get_hex_pT() ); //9
-    fprintf( Hfp, "%d\t", hexamers[i].get_hex_pD() ); //10
-    fprintf( Hfp, "%d\t", hexamers[i].get_hex_pS() ); //11   
-    fprintf( Hfp, "\n");
-  }  
-  */
-  
+   
   return hex_avr;  
 }
 
@@ -468,7 +331,8 @@ void write_outputfile(SystemVariables *sys)
   FILE *Afp = fopen( Afilename, "w" );
   FILE *Ifp = fopen( Ifilename, "w" );
   FILE *Tfp = fopen( Tfilename, "w" );      
-  
+
+ 
   cerr << "Writing output of Active hexamers to file: " << Afilename << endl;
 
   // Write file for Active hexamers.
@@ -648,6 +512,18 @@ void initialize_system_vars(SystemVariables *sys)
         paramset = 1;
       }        
       
+      if( param_name.compare("Piconc") == 0 )
+      {
+        sys->Piconc = param_value;
+        paramset = 1;
+      }    
+      
+      if( param_name.compare("Khyd") == 0 )
+      {
+        sys->Khyd = param_value;
+        paramset = 1;
+      }                
+      
       if( param_name.compare("t_sample_incr") == 0 )
       {
         sys->t_sample_incr = param_value;
@@ -725,6 +601,19 @@ void initialize_system_vars(SystemVariables *sys)
   
   sys->step_cntr = 0;
   sys->sample_cntr = 0;
+  
+  //Set flux counters to zero.
+  sys->tlastswitch = 0;
+  for(int i=0;i<7;i++)
+  { for(int j=0; j<7; j++)
+    {
+      sys->rate_pTp1[i][j]=0; 
+      sys->rate_pTm1[i][j]=0;
+      sys->rate_pSp1[i][j]=0;
+      sys->rate_pSm1[i][j]=0; 
+      sys->hist_pTVSpS[i][j]=0.;                 
+    }
+  }  
 }
 
 
@@ -756,17 +645,11 @@ ReactionConstants initialize_reaction_consts(SystemVariables *sys)
       {
         reaction_consts.kCIhyd = param_value; 
         paramset = 1;
-      }            
+      }             
 
-      if( param_name.compare("kCIADPoff0") == 0 )
+      if( param_name.compare("kCIATPoff") == 0 )
       {
-        reaction_consts.kCIADPoff0 = param_value; 
-        paramset = 1;
-      }
-      
-      if( param_name.compare("kCIADPoffA") == 0 )
-      {
-        reaction_consts.kCIADPoffA = param_value; 
+        reaction_consts.kCIATPoff = param_value; 
         paramset = 1;
       }
       
@@ -979,23 +862,29 @@ ReactionConstants initialize_reaction_consts(SystemVariables *sys)
       {
         reaction_consts.kCIIhydA = param_value; 
         paramset = 1;
-      }                                                             
+      }                                                     
 
-      if( param_name.compare("kCIInucloff0") == 0 )
+      if( param_name.compare("kCIIATPoff0") == 0 )
       {
-        reaction_consts.kCIInucloff0 = param_value; 
+        reaction_consts.kCIIATPoff0 = param_value; 
         paramset = 1;
       }                                                      
 
-      if( param_name.compare("kCIInucloffA") == 0 )
+      if( param_name.compare("kCIIATPoffA") == 0 )
       {
-        reaction_consts.kCIInucloffA = param_value; 
+        reaction_consts.kCIIATPoffA = param_value; 
         paramset = 1;
       }  
       
-      if( param_name.compare("KATPoKADP") == 0 )
+      if( param_name.compare("KCIIATPADP") == 0 )
       {
-        reaction_consts.KATPoKADP = param_value; 
+        reaction_consts.KCIIATPADP = param_value; 
+        paramset = 1;
+      }      
+
+      if( param_name.compare("KCIATPADP") == 0 )
+      {
+        reaction_consts.KCIATPADP = param_value; 
         paramset = 1;
       }      
 

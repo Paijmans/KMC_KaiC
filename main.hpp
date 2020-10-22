@@ -24,7 +24,7 @@
 #define FALSE 0
 #define TRUE  1
 
-#define MONOMER_N_REACTS 12
+#define MONOMER_N_REACTS 16
 #define HEXAMER_N_REACTS 8
 #define DATA_NBR 3
 
@@ -54,8 +54,8 @@ typedef struct reaction_constants
 { 
   //CI-nucleotide exchange
   double kCIhyd;
-  double kCIADPoff0;
-  double kCIADPoffA;
+  double kCIATPoff;
+  double KCIATPADP;  
 
   double kAkIDoff;
   double kconf0;
@@ -102,11 +102,13 @@ typedef struct reaction_constants
   //CII-nucleotide exchange
   double kCIIAon;
   double kCIIAoff;
+  
   double kCIIhyd0;
-  double kCIIhydA;  
-  double kCIInucloff0;
-  double kCIInucloffA;
-  double KATPoKADP;
+  double kCIIhydA; 
+       
+  double kCIIATPoff0;
+  double kCIIATPoffA;
+  double KCIIATPADP;
 
   //CII Phosphotransfer rates.
   double kUT;
@@ -155,6 +157,8 @@ typedef struct system_variables
 {
   //Static vars.
   double ATPfrac;
+  double Piconc;  
+  double Khyd;    
   double KaiA0; //Initial conditions in uM.
   double KaiC0;
   double volume; //Volume is 1 cubic micron -> 600.
@@ -189,6 +193,15 @@ typedef struct system_variables
   //State flips
   uint FlipCntrFw;
   uint FlipCntrBw;
+  
+  //Track phosphorylation steps.
+  double tlastswitch;
+  double hist_pTVSpS[7][7];
+  uint rate_pTp1[7][7];
+  uint rate_pTm1[7][7];
+  uint rate_pSp1[7][7];
+  uint rate_pSm1[7][7]; 
+  double temp;  
   
   /* Pointer to data struct for output data, 
      split to active and inactive hexamers*/

@@ -25,7 +25,7 @@ private: // Constant definitions
 public: //Constructors
     Hexamer()
     : index(0), active(1), CIIKaiA_bound(0), CIKaiA_bound(0), 
-      CIKaiB_bound(0), mon_prop_cont(6) {}
+      CIKaiB_bound(0), mon_prop_cont(6), tlastswitch(0.) {}
     
 public: // Public function definitions.
   
@@ -63,7 +63,7 @@ public: // Public function definitions.
     double kCIAoff();
     
     //ADP dissociation rate from CI domain.
-    double kCIADPoff();
+    double kCIATPoff();
     
     //KaiA on and off rates for the CII domain.
     double kCIIAon();
@@ -153,6 +153,7 @@ public: // Public function definitions.
 
 public: // Public member variables.
 
+    double tlastswitch;
 
 private: // Private member variables.
 
