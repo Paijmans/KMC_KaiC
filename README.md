@@ -2,8 +2,8 @@
 Kinetic Monte-Carlo simulation of the in-vitro Kai Circadian clock
 
 ![KMC_KaiC](./github_icon.png)
-Figure 1: Two states of the KaiC hexamer - the main boulding block of the model.
 
+Figure 1: Two states of the KaiC hexamer - the main boulding block of the model.
 
 MODEL CHANGE: FULLY REVERSIBLE VERSION OF THE MODEL
 
@@ -28,6 +28,7 @@ https://doi.org/10.1371/journal.pcbi.1005415
 The code is free for scientific use.  Please contact us if you plan to use this software for commercial purposes.  Do not further distribute without prior permission of the authors.  Please forward links to related publications so we can learn about your research.
 
 ![model_states](./KaiC_Legend.png)
+
 Figure 2: State variables of the KaiC monomer available in the model.
 
 ## Requirements
